@@ -27,7 +27,7 @@ type options struct {
 	Timeout  int    `long:"timeout" short:"t" default:"5" description:"Database connection timeout value."`
 
 	// Query Parameters
-	TableSize int    `long:"tablesize" short:"s" default:"10000000" description:"(in bytes) Only find xid_age for tables greater than this size."`
+	TableSize int    `long:"tablesize" short:"s" default:"10737418240" description:"(in bytes) Only find xid_age for tables greater than this size."`
 	Limit     string `long:"limit" short:"l" default:"10" description:"Limit the number of rows returned by the query. You can pass the value as 'ALL' to remove limits."`
 
 	// Thresholds
