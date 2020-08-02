@@ -4,12 +4,6 @@
 Helps protect againt Transaction ID Exhaustion (Wraparound) in PostgreSQL by alerting at given thresholds.
 Performs Scan on all tables in a given database where Table Size is greater than `tableSize`.
 
-Example: 
-```
-go-check-xid-age -H "localhost" -d "test" -U "postgres" -W ${PGPASSWORD} -w 18800 -c 18900
-Warning: Table order_transition has max xid_age 18809
-Warning: Table order_no_pool has max xid_age 18808
-```
 
 ## Usage:
 ```
@@ -30,4 +24,12 @@ Application Options:
 
 Help Options:
   -h, --help       Show this help message
+```
+
+
+## Example: 
+```
+go-check-xid-age -H "localhost" -d "test" -U "postgres" -W ${PGPASSWORD} -w 18800 -c 18900
+Warning: Table order_transition has max xid_age 18809
+Warning: Table order_no_pool has max xid_age 18808
 ```
