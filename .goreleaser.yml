@@ -27,6 +27,7 @@ snapshot:
 artifactories:
   - name: opentable
     mode: archive
+    checksum: true
     target: http://artifactory.otenv.com/artifactory/ot-golang/{{ .ProjectName }}/{{ .Version }}/
 changelog:
   sort: asc
