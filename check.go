@@ -13,6 +13,7 @@ import (
 
 const (
 	dbDriver = "postgres"
+	reportAt = "https://github.com/adiospeds/go-check-xid-age/issues"
 )
 
 type options struct {
@@ -70,6 +71,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	var normalEntries []string
 	var warningEntries []string
 	var criticalEntries []string
 	var readableLine string
@@ -96,6 +98,17 @@ func main() {
 			warningEntries = append(warningEntries, readableLine)
 		}
 
+		if xidAge < opts.Warning {
+			readableLine = "OK: Table " + tableName + " has max xid_age " + strconv.Itoa(xidAge)
+			normalEntries = append(normalEntries, readableLine)
+		}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "An error occured while reading rows %v\nReport at %s\n", err, reportAt)
+		os.Exit(1)
 	}
 
 	if len(criticalEntries) > 0 {
@@ -112,5 +125,6 @@ func main() {
 	}
 
 	fmt.Println("All tables have xid_age below threshold")
+	printEntries(normalEntries)
 
 }
