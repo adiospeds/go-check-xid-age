@@ -13,6 +13,7 @@ import (
 
 const (
 	dbDriver = "postgres"
+	reportAt = "https://github.com/adiospeds/go-check-xid-age/issues"
 )
 
 type options struct {
@@ -57,21 +58,20 @@ func main() {
 	}
 	defer conn.Close()
 
-	xidAgeQuery := fmt.Sprintf(`
-			SELECT relname as tablename, age(relfrozenxid) as xid_age
-			FROM pg_class
-			WHERE relkind = 'r' and pg_table_size(oid) > %d
-			ORDER BY age(relfrozenxid)
-			DESC LIMIT %s;
-			`, opts.TableSize, opts.Limit)
+	xidAgeQuery := `SELECT relname as tablename, age(relfrozenxid) as xid_age
+	FROM pg_class
+	WHERE relkind = 'r' and pg_table_size(oid) > $1
+	ORDER BY age(relfrozenxid)
+	DESC LIMIT $2;`
 
-	rows, err := conn.Query(xidAgeQuery)
+	rows, err := conn.Query(xidAgeQuery, opts.TableSize, opts.Limit)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to query results. %v\n", err)
 		os.Exit(1)
 	}
 
+	var normalEntries []string
 	var warningEntries []string
 	var criticalEntries []string
 	var readableLine string
@@ -98,6 +98,17 @@ func main() {
 			warningEntries = append(warningEntries, readableLine)
 		}
 
+		if xidAge < opts.Warning {
+			readableLine = "OK: Table " + tableName + " has max xid_age " + strconv.Itoa(xidAge)
+			normalEntries = append(normalEntries, readableLine)
+		}
+
+	}
+
+	err = rows.Err()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "An error occured while reading rows %v\nReport at %s\n", err, reportAt)
+		os.Exit(1)
 	}
 
 	if len(criticalEntries) > 0 {
@@ -114,5 +125,6 @@ func main() {
 	}
 
 	fmt.Println("All tables have xid_age below threshold")
+	printEntries(normalEntries)
 
 }
