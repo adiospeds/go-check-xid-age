@@ -57,15 +57,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	xidAgeQuery := fmt.Sprintf(`
-			SELECT relname as tablename, age(relfrozenxid) as xid_age
-			FROM pg_class
-			WHERE relkind = 'r' and pg_table_size(oid) > %d
-			ORDER BY age(relfrozenxid)
-			DESC LIMIT %s;
-			`, opts.TableSize, opts.Limit)
+	xidAgeQuery := `SELECT relname as tablename, age(relfrozenxid) as xid_age
+	FROM pg_class
+	WHERE relkind = 'r' and pg_table_size(oid) > $1
+	ORDER BY age(relfrozenxid)
+	DESC LIMIT $2;`
 
-	rows, err := conn.Query(xidAgeQuery)
+	rows, err := conn.Query(xidAgeQuery, opts.TableSize, opts.Limit)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to query results. %v\n", err)
